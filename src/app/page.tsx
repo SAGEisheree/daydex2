@@ -1,69 +1,114 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/utils/supabase/server';
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let profileUrl = '';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', user.id)
+      .single();
+    if (profile?.username) {
+      profileUrl = `/p/${profile.username}`;
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="flex flex-col min-h-[100dvh] bg-zinc-50">
+      <header className="px-4 lg:px-6 h-16 flex items-center border-b border-zinc-200 bg-white">
+        <Link className="flex items-center justify-center font-bold text-xl tracking-tight" href="/">
+          DayDex
+        </Link>
+        <nav className="ml-auto flex gap-4 sm:gap-6">
+          {user ? (
+            <Link href={profileUrl || '/login'}>
+              <Button variant="default" size="sm">Go to Journal</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </Link>
+              <Link href="/signup">
+                <Button variant="default" size="sm">Sign up</Button>
+              </Link>
+            </>
+          )}
+        </nav>
+      </header>
+      <main className="flex-1">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="flex flex-col items-center space-y-4 text-center">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none">
+                  Your Life, Documented.
+                </h1>
+                <p className="mx-auto max-w-[700px] text-zinc-500 md:text-xl dark:text-zinc-400">
+                  A calm, minimalist social journaling platform. Keep your thoughts private, share them with friends, or publish them to the world.
+                </p>
+              </div>
+              <div className="space-x-4 mt-8">
+                {user ? (
+                  <Link href={profileUrl || '/login'}>
+                    <Button size="lg">Open your Journal</Button>
+                  </Link>
+                ) : (
+                  <Link href="/signup">
+                    <Button size="lg">Start Journaling for free</Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-white border-t border-zinc-200">
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-3">
+              <div className="flex flex-col items-center space-y-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <h3 className="text-xl font-bold">Privacy First</h3>
+                <p className="text-sm text-zinc-500">Your entries are private by default. You control who sees your thoughts.</p>
+              </div>
+              <div className="flex flex-col items-center space-y-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3 className="text-xl font-bold">Social Sharing</h3>
+                <p className="text-sm text-zinc-500">Connect with friends, share specific entries, and react to their updates.</p>
+              </div>
+              <div className="flex flex-col items-center space-y-3 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-zinc-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+                </div>
+                <h3 className="text-xl font-bold">Interactive Calendar</h3>
+                <p className="text-sm text-zinc-500">Visualize your journaling habit with a beautiful, intuitive calendar view.</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-zinc-200 bg-white">
+        <p className="text-xs text-zinc-500">
+          &copy; 2026 DayDex. All rights reserved.
+        </p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Terms of Service
+          </Link>
+          <Link className="text-xs hover:underline underline-offset-4" href="#">
+            Privacy
+          </Link>
+        </nav>
+      </footer>
     </div>
   );
 }
