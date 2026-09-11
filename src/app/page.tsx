@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/utils/supabase/server';
 
@@ -19,23 +20,30 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-zinc-50">
-      <header className="px-4 lg:px-6 h-16 flex items-center border-b border-zinc-200 bg-white">
-        <Link className="flex items-center justify-center font-bold text-xl tracking-tight" href="/">
-          DayDex
+    <div className="flex flex-col min-h-[100dvh] bg-[#eaf1f7]">
+      <header className="px-4 sm:px-8 lg:px-12 py-3.5 flex items-center border-b border-[#d8e4ee] bg-[#e9f0f6]">
+        <Link className="flex items-center gap-2" href="/">
+          <Image
+            src="/logo.svg"
+            alt="DayDex"
+            width={180}
+            height={50}
+            priority
+            className="h-8 sm:h-9 md:h-10 w-auto object-contain"
+          />
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto flex items-center gap-4 sm:gap-6">
           {user ? (
             <Link href={profileUrl || '/login'}>
-              <Button variant="default" size="sm">Go to Journal</Button>
+              <Button className="bg-[#2D6BD8] hover:bg-[#255bc0] text-white font-medium" size="sm">Go to Journal</Button>
             </Link>
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">Log in</Button>
+                <Button variant="ghost" className="text-slate-700 hover:text-[#2D6BD8]" size="sm">Log in</Button>
               </Link>
               <Link href="/signup">
-                <Button variant="default" size="sm">Sign up</Button>
+                <Button className="bg-[#2D6BD8] hover:bg-[#255bc0] text-white font-medium" size="sm">Sign up</Button>
               </Link>
             </>
           )}
