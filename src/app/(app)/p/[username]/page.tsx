@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient, getAuthUser } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import { ProfileHeader } from '@/components/profile-header';
 import { JournalWorkspace } from '@/components/journal-workspace';
@@ -8,19 +8,20 @@ export default async function ProfilePage(props: { params: Promise<{ username: s
   const searchParams = await props.searchParams;
   const supabase = await createClient();
 
-  // Fetch the profile for this page
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('username', params.username)
-    .single();
+  // Concurrently fetch profile and current auth user
+  const [{ data: profile }, user] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('username', params.username)
+      .single(),
+    getAuthUser(),
+  ]);
 
   if (!profile) {
     notFound();
   }
 
-  // Get current auth user to determine permissions
-  const { data: { user } } = await supabase.auth.getUser();
   const isOwner = user?.id === profile.id;
 
   // Fetch basic stats (friends count, entries count, etc)

@@ -29,6 +29,7 @@ export default async function ProfileSettingsPage() {
     const fullName = formData.get('full_name') as string;
     const bio = formData.get('bio') as string;
     const avatarUrl = formData.get('avatar_url') as string;
+    const coverUrl = formData.get('cover_url') as string;
 
     await supabase
       .from('profiles')
@@ -36,11 +37,15 @@ export default async function ProfileSettingsPage() {
         full_name: fullName,
         bio,
         avatar_url: avatarUrl,
+        cover_url: coverUrl,
       })
       .eq('id', user.id);
 
     revalidatePath('/settings/profile');
-    revalidatePath(`/p/${profile.username}`);
+    if (profile?.username) {
+      revalidatePath(`/p/${profile.username}`);
+    }
+    revalidatePath('/', 'layout');
   }
 
   return (
@@ -84,7 +89,22 @@ export default async function ProfileSettingsPage() {
               name="avatar_url" 
               defaultValue={profile?.avatar_url || ''} 
               className="bg-zinc-50/50"
+              placeholder="https://example.com/avatar.jpg"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cover_url">Banner / Cover Image URL (Optional)</Label>
+            <Input 
+              id="cover_url" 
+              name="cover_url" 
+              defaultValue={profile?.cover_url || ''} 
+              className="bg-zinc-50/50"
+              placeholder="https://example.com/banner-image.jpg"
+            />
+            <p className="text-xs text-zinc-500">
+              Provide an image URL to display as your custom header banner.
+            </p>
           </div>
 
           <Button type="submit" className="mt-4">

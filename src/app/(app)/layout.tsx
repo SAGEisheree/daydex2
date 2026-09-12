@@ -1,15 +1,15 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient, getAuthUser } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/navbar';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
-  if (error || !user) {
+  if (!user) {
     redirect('/login');
   }
 
+  const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
